@@ -1,0 +1,52 @@
+#include <msp430.h> 
+int main(void)
+{
+	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+	UCA1CTLW0 |= UCSWRST;
+	UCA1CTLW0 |= UCSSEL__SMCLK;
+	UCA1BRW = 8;
+	UCA1MCTLW=0XD600;
+	P4SEL1&=~BIT2;
+	P4SEL0 |= BIT2;
+	P4SEL1&=~BIT3;
+	P4SEL0|=BIT3;
+	PM5CTL0&=~LOCKLPM5;
+	UCA1CTLW0&=~UCSWRST;
+	UCA1IE|=UCRXIE;
+	__enable_interrupt();
+	int i;
+	char var;
+	UCA1RXBUF=var;
+	if(var>=97&&var<=122)
+	    {
+	        var=var-32;
+	        UCA1TXBUF= var;
+	    }
+	    else if(var>=48&&var<=57)
+	    {
+	      for(i=0;i<var-48;i++)
+	      {
+	          UCA1TXBUF="vijay";
+	      }
+	    }
+	    else{
+	         UCA1TXBUF=var;
+	    }
+
+
+	
+	return 0;
+}
+#pragma vector = EUSCI_A1_VECTOR
+__interrupt void EUSCI_A1_RX_ISR(void)
+{
+     if(UCA1RXBUF)
+     {
+         P4OUT ^= BIT3;
+     }
+}
+
+
+
+
+
